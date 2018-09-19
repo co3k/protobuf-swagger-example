@@ -16,7 +16,7 @@
 
 ## How To Use
 
-1. Make sure that the above [Requirements](#Requirements) are satisfied on your environment.
+1. Make sure that the above [Requirements](#requirements) are satisfied on your environment.
 2. Run `$ make 01-ajiting.swagger.json` or `$ make 02-ajiting.swagger.json`
   * If you want to know about these commands doing what, type `$ cat Makefile`
 3. Enjoy!
