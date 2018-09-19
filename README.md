@@ -9,10 +9,10 @@
 
 ## Directory Structure
 
-* 01-ajiting.proto: A simple example Protocol Buffers file of `#ajiting` Web API definition
-* 01-ajiting.swagger.json: Generated from 01-ajiting.proto (see also the following chapter)
-* 02-ajiting.proto: A complex (with OpenAPI specific configurations) example Protocol Buffers file of `#ajiting` Web API definition
-* 02-ajiting.swagger.json: Generated from 02-ajiting.proto (see also the following chapter)
+* `01-ajiting.proto`: A simple example Protocol Buffers file of `#ajiting` Web API definition
+* `01-ajiting.swagger.json`: Generated from 01-ajiting.proto (see also the following chapter)
+* `02-ajiting.proto`: A complex (with OpenAPI specific configurations) example Protocol Buffers file of `#ajiting` Web API definition
+* `02-ajiting.swagger.json`: Generated from 02-ajiting.proto (see also the following chapter)
 
 ## How To Use
 
