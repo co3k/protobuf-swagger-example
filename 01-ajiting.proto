@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+message Ajiting {
+  message GeoCoordinate {
+    string latitude = 1;
+    string longitude = 2;
+  }
+
+  string description = 1;
+  string url = 2;
+  GeoCoordinate location = 3;
+  repeated string free = 5;
+}
+
+message AjitingResponse {
+  Ajiting ajiting_message = 1;
+}
+
+message ListAjitingRequest {
+  string query = 1;
+}
+
+message ListAjitingResponse {
+  int32 num = 1;
+  repeated Ajiting ajitings = 2;
+}
+
+message UpdateAjitingRequest {
+  int32 id = 1;
+  Ajiting ajiting = 2;
+}
+
+service AjitingService {
+  rpc ListAjiting(ListAjitingRequest) returns (ListAjitingResponse) {
+    option (google.api.http).get = "/v1/ajiting";
+  }
+
+  rpc UpdateAjiting(UpdateAjitingRequest) returns (AjitingResponse) {
+    option (google.api.http) = {
+      put: "/v1/ajiting/{id}"
+      body: "ajiting"
+    };
+  }
+}

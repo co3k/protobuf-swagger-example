@@ -1,0 +1,222 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "ajiting-api",
+    "description": "ajiting 用の Web API です。",
+    "version": "1.0"
+  },
+  "host": "api.ajiting.example.com",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/ajiting": {
+      "get": {
+        "summary": "みんなの #ajiting を一覧する",
+        "description": "みんながそれぞれに思う #ajiting を一覧します。\nquery が指定されている場合はその条件に従った #ajiting を絞り込みます。",
+        "operationId": "ListAjiting",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ListAjitingResponse"
+            }
+          },
+          "403": {
+            "description": "リソースへのアクセス権がない場合のレスポンスです。",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "指定した条件に当てはまる ajiting がなかった場合に返すレスポンスです。",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "query",
+            "description": "希望する ajiting の条件を指定するための検索クエリ.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AjitingService"
+        ],
+        "security": []
+      }
+    },
+    "/v1/ajiting/{id}": {
+      "put": {
+        "summary": "#ajiting を更新する",
+        "description": "指定した内容によって #ajiting を更新します。",
+        "operationId": "UpdateAjiting",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AjitingResponse"
+            }
+          },
+          "403": {
+            "description": "リソースへのアクセス権がない場合のレスポンスです。",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "リソースが見つからなかったときのレスポンスです。",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "更新する ajiting の ID",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "body",
+            "description": "更新する ajiting オブジェクトの内容",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Ajiting"
+            }
+          }
+        ],
+        "tags": [
+          "AjitingService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "Ajiting": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "title": "ajiting の説明"
+        },
+        "url": {
+          "type": "string",
+          "title": "ajiting の URL"
+        },
+        "location": {
+          "$ref": "#/definitions/AjitingGeoCoordinate",
+          "title": "ajiting がおこなわれる場所"
+        },
+        "free": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "何が free な ajiting か"
+        }
+      },
+      "description": "ajiting の緯度経度情報や、どのような ajiting がおこなわれるか、何が free なのかを表します。",
+      "title": "ajiting を表現するオブジェクト"
+    },
+    "AjitingGeoCoordinate": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "string",
+          "description": "世界測地系 (WGS84) における緯度情報を表します。",
+          "title": "緯度",
+          "pattern": "^[\\-]?[0-9]{0,2}\\.[0-9]+$"
+        },
+        "longitude": {
+          "type": "string",
+          "description": "世界測地系 (WGS84) における経度情報を表します。",
+          "title": "経度",
+          "pattern": "^[\\-]?[0-9]{0,3}\\.[0-9]+$"
+        }
+      },
+      "description": "世界測地系 (WGS84) における緯度経度情報を表します。\n日本測地系 2000 や 日本測地系 2011 などの他の測地系の値は受け容れませんので、\n事前に変換をおこなっておく必要があります。",
+      "title": "緯度経度情報",
+      "required": [
+        "latitude",
+        "longitude"
+      ]
+    },
+    "AjitingResponse": {
+      "type": "object",
+      "properties": {
+        "#ajiting": {
+          "$ref": "#/definitions/Ajiting"
+        }
+      },
+      "description": "T シャツの裏に印字されているように #ajiting をキーとする `Ajiting` を返します",
+      "title": "ajiting を返すためのレスポンス"
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "title": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "instance": {
+          "type": "string"
+        }
+      },
+      "description": "[RFC7807](https://tools.ietf.org/html/rfc7807) に従ってエラーの内容を表します。",
+      "title": "エラーレスポンスオブジェクト"
+    },
+    "ListAjitingResponse": {
+      "type": "object",
+      "properties": {
+        "num": {
+          "type": "integer",
+          "format": "int32",
+          "title": "該当する ajiting の件数"
+        },
+        "ajitings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AjitingResponse"
+          },
+          "title": "該当する ajiting の一覧"
+        }
+      },
+      "title": "ajiting 一覧取得用レスポンス"
+    }
+  },
+  "securityDefinitions": {
+    "OAuth2": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://ajiting.example.com/oauth/authorize",
+      "tokenUrl": "https://ajiting.example.com/oauth/token"
+    }
+  },
+  "security": [
+    {
+      "OAuth2": []
+    }
+  ]
+}

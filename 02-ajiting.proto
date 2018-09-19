@@ -1,0 +1,165 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "protoc-gen-swagger/options/annotations.proto";
+
+option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+    info: {
+        title: "ajiting-api";
+        description: "ajiting 用の Web API です。";
+        version: "1.0";
+    }
+    host: "api.ajiting.example.com";
+    schemes: HTTPS;
+    security_definitions: {
+        security: {
+            key: "OAuth2";
+            value: {
+                type: TYPE_OAUTH2;
+                flow: FLOW_ACCESS_CODE;
+                authorization_url: "https://ajiting.example.com/oauth/authorize";
+                token_url: "https://ajiting.example.com/oauth/token";
+            }
+        }
+    }
+    security: {
+        security_requirement: {
+            key: "OAuth2";
+            value: {
+            };
+        }
+    }
+    responses: {
+      key: "403";
+      value: {
+        description: "リソースへのアクセス権がない場合のレスポンスです。";
+        schema: {
+          json_schema: {
+            ref: ".ErrorResponse";
+          }
+        }
+      }
+    }
+    responses: {
+      key: "404";
+      value: {
+        description: "リソースが見つからなかったときのレスポンスです。";
+        schema: {
+          json_schema: {
+            ref: ".ErrorResponse";
+          }
+        }
+      }
+    }
+};
+
+// エラーレスポンスオブジェクト
+//
+// [RFC7807](https://tools.ietf.org/html/rfc7807) に従ってエラーの内容を表します。
+message ErrorResponse {
+  string type = 1;
+  int32 status = 2;
+  string title = 3;
+  string detail = 4;
+  string instance = 5;
+}
+
+// ajiting を表現するオブジェクト
+//
+// ajiting の緯度経度情報や、どのような ajiting がおこなわれるか、何が free なのかを表します。
+message Ajiting {
+  // 緯度経度情報
+  //
+  // 世界測地系 (WGS84) における緯度経度情報を表します。
+  // 日本測地系 2000 や 日本測地系 2011 などの他の測地系の値は受け容れませんので、
+  // 事前に変換をおこなっておく必要があります。
+  message GeoCoordinate {
+    option (grpc.gateway.protoc_gen_swagger.options.openapiv2_schema) = {
+      json_schema: {
+        required: ["latitude", "longitude"]
+      }
+    };
+
+    // 緯度
+    //
+    // 世界測地系 (WGS84) における緯度情報を表します。
+    string latitude = 1 [(grpc.gateway.protoc_gen_swagger.options.openapiv2_field) = {pattern: "^[\\-]?[0-9]{0,2}\\.[0-9]+$"}];
+
+    // 経度
+    //
+    // 世界測地系 (WGS84) における経度情報を表します。
+    string longitude = 2 [(grpc.gateway.protoc_gen_swagger.options.openapiv2_field) = {pattern: "^[\\-]?[0-9]{0,3}\\.[0-9]+$"}];
+  }
+
+  // ajiting の説明
+  string description = 1;
+
+  // ajiting の URL
+  string url = 2;
+
+  // ajiting がおこなわれる場所
+  GeoCoordinate location = 3;
+
+  // 何が free な ajiting か
+  repeated string free = 5;
+}
+
+// ajiting を返すためのレスポンス
+//
+// T シャツの裏に印字されているように #ajiting をキーとする `Ajiting` を返します
+message AjitingResponse {
+  Ajiting ajiting_message = 1 [json_name = "#ajiting"];
+}
+
+// ajiting 一覧取得用リクエスト
+message ListAjitingRequest {
+  // 希望する ajiting の条件を指定するための検索クエリ
+  string query = 1;
+}
+
+// ajiting 一覧取得用レスポンス
+message ListAjitingResponse {
+  // 該当する ajiting の件数
+  int32 num = 1;
+
+  // 該当する ajiting の一覧
+  repeated AjitingResponse ajitings = 2;
+}
+
+// ajiting 更新要リクエスト
+message UpdateAjitingRequest {
+  // 更新する ajiting の ID
+  int32 id = 1;
+
+  // 更新する ajiting オブジェクトの内容
+  Ajiting ajiting = 2;
+}
+
+service AjitingService {
+  // みんなの #ajiting を一覧する
+  //
+  // みんながそれぞれに思う #ajiting を一覧します。
+  // query が指定されている場合はその条件に従った #ajiting を絞り込みます。
+  rpc ListAjiting(ListAjitingRequest) returns (ListAjitingResponse) {
+    option (google.api.http).get = "/v1/ajiting";
+    option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+      security: {};
+      responses: {
+        key: "404";
+        value: {
+          description: "指定した条件に当てはまる ajiting がなかった場合に返すレスポンスです。";
+        }
+      };
+    };
+  }
+
+  // #ajiting を更新する
+  //
+  // 指定した内容によって #ajiting を更新します。
+  rpc UpdateAjiting(UpdateAjitingRequest) returns (AjitingResponse) {
+    option (google.api.http) = {
+      put: "/v1/ajiting/{id}"
+      body: "ajiting"
+    };
+  }
+}
