@@ -2,7 +2,7 @@
 
 ## Requirements
 
-* Makefile
+* Make
 * Protocol Buffers
 * Swagger
 * grpc-gateway v1.5.0+
